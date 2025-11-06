@@ -7,6 +7,7 @@ header('Access-Control-Allow-Origin: *');
 function validateApiKey($api_key) {
     $valid_keys = array(
         "DEMO123456" => strtotime('+7 days') * 1000,
+        "DEMO30" => strtotime('+30 seconds') * 1000,
         "PREMIUM001" => strtotime('+30 days') * 1000,
         "PREMIUM002" => strtotime('+90 days') * 1000,
         "LIFETIME01" => strtotime('+10 years') * 1000
