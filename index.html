@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Link Converter</title>
+<style>
+  :root {
+    --primary: #3b82f6;
+    --secondary: #22d3ee;
+    --bg: #0f172a;
+    --text: #e2e8f0;
+    --glass: rgba(255, 255, 255, 0.08);
+    --success: #22c55e;
+    --error: #ef4444;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top right, #1e3a8a, #0f172a);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 900px;
+    background: var(--glass);
+    padding: 30px;
+    border-radius: 22px;
+    backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    text-align: center;
+    animation: fadeInUp 0.8s ease;
+    margin: 20px 0;
+  }
+
+  h1 {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(59,130,246,0.7);
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 0.95rem;
+    opacity: 0.85;
+  }
+
+  .input-area {
+    position: relative;
+    margin-top: 15px;
+  }
+
+  textarea, input[type="text"] {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-radius: 14px;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: inset 0 0 10px rgba(59,130,246,0.15);
+  }
+
+  textarea {
+    display: none;
+    height: 160px;
+    resize: none;
+  }
+
+  button {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59,130,246,0.4);
+  }
+
+  .convert-btn {
+    width: 100%;
+    margin-top: 18px;
+  }
+
+  .switch-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 12px;
+    gap: 10px;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255,255,255,0.25);
+    transition: 0.3s;
+    border-radius: 50px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(34,211,238,0.6);
+  }
+
+  input:checked + .slider {
+    background-color: rgba(59,130,246,0.3);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  /* Modern Table Styles */
+  .result-table-container {
+    margin-top: 20px;
+    display: none;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px;
+    backdrop-filter: blur(6px);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .result-table th {
+    background: rgba(59,130,246,0.2);
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--secondary);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: sticky;
+    top: 0;
+  }
+
+  .result-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .result-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .result-table tr:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .status-success {
+    background: rgba(34,197,94,0.2);
+    color: var(--success);
+  }
+
+  .status-failed {
+    background: rgba(239,68,68,0.2);
+    color: var(--error);
+  }
+
+  .status-pending {
+    background: rgba(251,191,36,0.2);
+    color: #fbbf24;
+  }
+
+  .url-cell {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .result-url-cell {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .action-cell {
+    width: 80px;
+    text-align: center;
+  }
+
+  .copy-btn {
+    background: rgba(59,130,246,0.3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover {
+    background: rgba(59,130,246,0.5);
+    transform: scale(1.05);
+  }
+
+  /* Floating Buttons */
+  .floating-buttons {
+    position: fixed;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 99;
+  }
+
+  .float-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    padding: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    box-shadow: 0 0 15px rgba(59,130,246,0.5);
+    transition: 0.3s;
+    display: none;
+  }
+
+  .float-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 25px rgba(34,211,238,0.8);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+  }
+
+  .toast.show { opacity: 1; }
+
+  .loading {
+    display: none;
+    margin-top: 18px;
+  }
+
+  .loading-with-cancel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top: 4px solid var(--secondary);
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 15px rgba(34,211,238,0.5);
+  }
+
+  .progress-text {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--secondary);
+    text-shadow: 0 0 8px rgba(34,211,238,0.6);
+  }
+
+  .cancel-btn {
+    background: rgba(239,68,68,0.2);
+    color: var(--error);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .cancel-btn:hover {
+    background: rgba(239,68,68,0.4);
+    transform: scale(1.05);
+  }
+
+  .final-result {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #22c55e;
+  }
+
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>✨ Link Converter</h1>
+  <p>Masukkan URL atau daftar link untuk dikonversi:</p>
+
+  <div class="input-area">
+    <input type="text" id="urlInput" placeholder="https://contoh.com">
+    <textarea id="multiInput" placeholder="Produk1&#10;https://link1.com&#10;&#10;Produk2&#10;https://link2.com&#10;atau hanya:&#10;https://link1.com&#10;https://link2.com"></textarea>
+  </div>
+
+  <div class="switch-box">
+    <label>Single</label>
+    <label class="switch">
+      <input type="checkbox" id="modeSwitch" onchange="toggleMode()">
+      <span class="slider"></span>
+    </label>
+    <label>Multi</label>
+  </div>
+
+  <button class="convert-btn" onclick="convertLink()">Convert Sekarang</button>
+
+  <div class="loading" id="loading">
+    <div class="loading-with-cancel">
+      <div class="spinner"></div>
+      <div class="progress-text" id="progressText"></div>
+      <button class="cancel-btn" onclick="cancelBypass()">
+        <span>❌</span> Batalkan
+      </button>
+    </div>
+  </div>
+
+  <div class="result-table-container" id="resultTableContainer">
+    <table class="result-table" id="resultTable">
+      <thead>
+        <tr>
+          <th width="20%">Nama</th>
+          <th width="25%">URL Asli</th>
+          <th width="25%">Hasil Bypass</th>
+          <th width="15%">Status</th>
+          <th width="15%">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="resultTableBody">
+        <!-- Hasil akan ditampilkan di sini -->
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="final-result" id="finalResult" style="display: none;"></div>
+</div>
+
+<div class="floating-buttons">
+  <button class="float-btn" id="downloadBtn" title="Download Hasil" onclick="downloadResult()">💾</button>
+  <button class="float-btn" id="copyBtn" title="Salin Semua Hasil" onclick="copyAllResults()">📋</button>
+  <button class="float-btn" id="clearBtn" title="Hapus Semua" onclick="clearAll()">🧹</button>
+</div>
+
+<div class="toast" id="toast">Disalin ke clipboard!</div>
+
+<script>
+  const urlInput = document.getElementById('urlInput');
+  const multiInput = document.getElementById('multiInput');
+  const resultTableContainer = document.getElementById('resultTableContainer');
+  const resultTableBody = document.getElementById('resultTableBody');
+  const finalResult = document.getElementById('finalResult');
+  const copyBtn = document.getElementById('copyBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const toast = document.getElementById('toast');
+  const loading = document.getElementById('loading');
+  const progressText = document.getElementById('progressText');
+  const modeSwitch = document.getElementById('modeSwitch');
+  
+  let isBypassCancelled = false;
+  let currentBypassProcess = null;
+  let convertedResults = [];
+
+  window.onload = () => {
+    const savedMode = localStorage.getItem("convert_mode");
+    if (savedMode === "multi") {
+      modeSwitch.checked = true;
+      urlInput.style.display = "none";
+      multiInput.style.display = "block";
+    }
+  };
+
+  function toggleMode() {
+    if (modeSwitch.checked) {
+      urlInput.style.display = "none";
+      multiInput.style.display = "block";
+      localStorage.setItem("convert_mode", "multi");
+    } else {
+      urlInput.style.display = "block";
+      multiInput.style.display = "none";
+      localStorage.setItem("convert_mode", "single");
+    }
+    resultTableContainer.style.display = "none";
+    finalResult.style.display = "none";
+    copyBtn.style.display = "none";
+    clearBtn.style.display = "none";
+    downloadBtn.style.display = "none";
+    convertedResults = [];
+  }
+
+  async function convertLink() {
+    const isMulti = modeSwitch.checked;
+    const api = "https://belajar.dpdns.org/ouo";
+
+    if (isMulti && !multiInput.value.trim()) return showToast("⚠️ Mohon isi daftar link terlebih dahulu!");
+    if (!isMulti && !urlInput.value.trim()) return showToast("⚠️ Mohon isi URL terlebih dahulu!");
+
+    // 🔍 Validasi URL sebelum konversi
+    if (!isMulti && !/^https?:\/\//i.test(urlInput.value.trim())) {
+      return showToast("❗ URL harus diawali http:// atau https://");
+    }
+
+    isBypassCancelled = false;
+    loading.style.display = "block";
+    progressText.textContent = "";
+    resultTableContainer.style.display = "none";
+    finalResult.style.display = "none";
+    copyBtn.style.display = "none";
+    clearBtn.style.display = "none";
+    downloadBtn.style.display = "none";
+    
+    // Kosongkan tabel hasil sebelumnya
+    resultTableBody.innerHTML = "";
+    convertedResults = [];
+
+    try {
+      let resultText = "";
+
+      if (isMulti) {
+        const lines = multiInput.value.trim().split(/\n+/);
+        const urls = [];
+        let currentName = "";
+        
+        // Ekstrak URL dari input
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+
+          if (trimmed.startsWith("http")) {
+            urls.push({
+              name: currentName,
+              url: trimmed
+            });
+            currentName = "";
+          } else {
+            currentName = trimmed;
+          }
+        }
+
+        // Tambahkan baris ke tabel untuk setiap URL
+        urls.forEach((item, index) => {
+          const row = document.createElement('tr');
+          row.id = `row-${index}`;
+          row.innerHTML = `
+            <td>${item.name || '-'}</td>
+            <td class="url-cell">${item.url}</td>
+            <td class="result-url-cell" id="result-${index}">-</td>
+            <td><span class="status-badge status-pending" id="status-${index}">Pending</span></td>
+            <td class="action-cell">-</td>
+          `;
+          resultTableBody.appendChild(row);
+        });
+
+        // Tampilkan tabel
+        resultTableContainer.style.display = "block";
+
+        // Konversi URL satu per satu dengan progress
+        let successCount = 0;
+        const totalUrls = urls.length;
+        
+        for (let i = 0; i < urls.length; i++) {
+          // Cek apakah proses dibatalkan
+          if (isBypassCancelled) {
+            updateStatus(i, "Dibatalkan", "failed");
+            progressText.textContent = `Proses dibatalkan (${successCount}/${totalUrls} berhasil)`;
+            break;
+          }
+          
+          const item = urls[i];
+          try {
+            progressText.textContent = `Memproses ${i+1}/${totalUrls} - Berhasil: ${successCount}`;
+            
+            // Update status menjadi "Processing"
+            updateStatus(i, "Memproses...", "pending");
+            
+            const res = await fetch(api, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: item.url })
+            });
+            
+            const data = await res.json();
+            const converted = data.converted_link || data.result || "Gagal";
+            
+            if (converted !== "Gagal") {
+              successCount++;
+              updateStatus(i, "Berhasil", "success");
+              updateResult(i, converted);
+              
+              // Simpan hasil yang berhasil
+              convertedResults.push({
+                name: item.name,
+                url: converted
+              });
+            } else {
+              updateStatus(i, "Gagal", "failed");
+              updateResult(i, "Gagal mengonversi");
+            }
+            
+            progressText.textContent = `Memproses ${i+1}/${totalUrls} - Berhasil: ${successCount}`;
+            
+          } catch (err) {
+            console.error(`Gagal mengonversi URL: ${item.url}`, err);
+            updateStatus(i, "Gagal", "failed");
+            updateResult(i, "Error: " + err.message);
+          }
+        }
+        
+        // Sembunyikan loading dan tampilkan hasil akhir
+        loading.style.display = "none";
+        finalResult.textContent = `Selesai! Berhasil mengonversi ${successCount} dari ${totalUrls} URL`;
+        finalResult.style.display = "block";
+        
+      } else {
+        // Mode single
+        const res = await fetch(api, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: urlInput.value.trim() })
+        });
+        const data = await res.json();
+        resultText = data.converted_link || data.result || "⚠️ Gagal mengonversi link!";
+        
+        // Tampilkan hasil single di tabel
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>-</td>
+          <td class="url-cell">${urlInput.value.trim()}</td>
+          <td class="result-url-cell">${resultText}</td>
+          <td><span class="status-badge status-success">Berhasil</span></td>
+          <td class="action-cell"><button class="copy-btn" onclick="copyToClipboard('${resultText}')">Salin</button></td>
+        `;
+        resultTableBody.appendChild(row);
+        
+        // Simpan hasil single
+        convertedResults.push({
+          name: "",
+          url: resultText
+        });
+        
+        loading.style.display = "none";
+        resultTableContainer.style.display = "block";
+      }
+
+      // Tampilkan tombol aksi
+      copyBtn.style.display = "block";
+      clearBtn.style.display = "block";
+      downloadBtn.style.display = "block";
+      
+    } catch (err) {
+      loading.style.display = "none";
+      showToast("❌ Gagal menghubungi server!");
+      console.error(err);
+    }
+  }
+
+  function updateStatus(index, text, status) {
+    const statusElement = document.getElementById(`status-${index}`);
+    if (statusElement) {
+      statusElement.textContent = text;
+      statusElement.className = `status-badge status-${status}`;
+    }
+  }
+
+  function updateResult(index, result) {
+    const row = document.getElementById(`row-${index}`);
+    if (row) {
+      const resultCell = document.getElementById(`result-${index}`);
+      const actionCell = row.querySelector('.action-cell');
+      
+      if (resultCell) {
+        resultCell.textContent = result;
+      }
+      
+      if (result !== "Gagal mengonversi" && !result.includes("Error:")) {
+        actionCell.innerHTML = `<button class="copy-btn" onclick="copyToClipboard('${result}')">Salin</button>`;
+      } else {
+        actionCell.innerHTML = "-";
+      }
+    }
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+    showToast("✅ URL disalin ke clipboard!");
+  }
+
+  function copyAllResults() {
+    if (convertedResults.length === 0) {
+      showToast("⚠️ Tidak ada hasil yang berhasil dikonversi!");
+      return;
+    }
+    
+    let text = "";
+    
+    convertedResults.forEach(result => {
+      if (result.name) {
+        text += `${result.name}\n${result.url}\n\n`;
+      } else {
+        text += `${result.url}\n\n`;
+      }
+    });
+    
+    navigator.clipboard.writeText(text.trim());
+    showToast("✅ Semua hasil berhasil disalin ke clipboard!");
+  }
+
+  function downloadResult() {
+    if (convertedResults.length === 0) {
+      showToast("⚠️ Tidak ada hasil yang berhasil dikonversi!");
+      return;
+    }
+    
+    let text = "Hasil Konversi Link\n===================\n\n";
+    
+    convertedResults.forEach(result => {
+      if (result.name) {
+        text += `${result.name}\n${result.url}\n\n`;
+      } else {
+        text += `${result.url}\n\n`;
+      }
+    });
+    
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "converted_links.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("💾 File hasil telah diunduh!");
+  }
+
+  function clearAll() {
+    urlInput.value = "";
+    multiInput.value = "";
+    resultTableContainer.style.display = "none";
+    finalResult.style.display = "none";
+    copyBtn.style.display = "none";
+    clearBtn.style.display = "none";
+    downloadBtn.style.display = "none";
+    progressText.textContent = "";
+    loading.style.display = "none";
+    resultTableBody.innerHTML = "";
+    convertedResults = [];
+  }
+
+  function cancelBypass() {
+    isBypassCancelled = true;
+    showToast("❌ Proses bypass dibatalkan");
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1800);
+  }
+</script>
+
+</body>
+</html>
